@@ -1,7 +1,21 @@
 var mqtt;
 var reconnectTimeout = 2000;
-var host = "192.168.1.146"; //change this
+var host = "192.168.43.58"; //change this
 var port = 9001;
+
+function onMessageArrived(r_message) {
+    out_msg = "Message received " + r_message.payloadString + "<br>";
+    out_msg = out_msg + "Message received Topic " + r_message.destinationName;
+    console.log(out_msg);
+    $("#messages").innerHTML = out_msg;
+}
+
+function onMessageArrived(r_message) {
+        out_msg = "Message received " + r_message.payloadString + "<br>";
+        out_msg = out_msg + "Message received Topic " + r_message.destinationName;
+        console.log(out_msg);
+        document.getElementById("messages").innerHTML = out_msg;
+    }
 
 function onConnect() {
     // Once a connection has been made, make a subscription and send a message.

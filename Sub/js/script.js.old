@@ -1,0 +1,30 @@
+var ctx = document.getElementById('myChart').getContext('2d')
+
+const labels = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+];
+
+var xData = [0, 10, 5, 2, 20, 30, 45];
+
+const data = {
+  labels: labels,
+  datasets: [{
+    label: 'My First dataset',
+    backgroundColor: 'rgb(255, 99, 132)',
+    borderColor: 'rgb(255, 99, 132)',
+    data: xData,
+  }]
+};
+
+const config = {
+  type: 'line',
+  data: data,
+  options: {}
+};
+
+var myChart = new Chart(ctx, config)
