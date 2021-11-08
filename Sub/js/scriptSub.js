@@ -4,7 +4,7 @@ var host = "192.168.43.58"; //change this
 var port = 9001;
 
 function onMessageArrived(r_message) {
-    out_msg = "Message received " + r_message.payloadString + "<br>";
+    out_msg = r_message.payloadString;
     console.log(out_msg);
     document.getElementById("messages").innerHTML = out_msg;
 }
