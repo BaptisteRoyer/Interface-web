@@ -5,31 +5,22 @@ var port = 9001;
 
 function onMessageArrived(r_message) {
     out_msg = "Message received " + r_message.payloadString + "<br>";
-    out_msg = out_msg + "Message received Topic " + r_message.destinationName;
     console.log(out_msg);
-    $("#messages").innerHTML = out_msg;
+    document.getElementById("messages").innerHTML = out_msg;
 }
-
-function onMessageArrived(r_message) {
-        out_msg = "Message received " + r_message.payloadString + "<br>";
-        out_msg = out_msg + "Message received Topic " + r_message.destinationName;
-        console.log(out_msg);
-        document.getElementById("messages").innerHTML = out_msg;
-    }
 
 function onConnect() {
     // Once a connection has been made, make a subscription and send a message.
 
     console.log("Connected ");
     //mqtt.subscribe("sensor1");
-    message = new Paho.MQTT.Message("Hello World");
-    message.destinationName = "sensor1";
-    mqtt.send(message);
+    mqtt.subscribe("topic1")
 }
 
 function MQTTconnect() {
+    console.log("alo")
     console.log("connecting to " + host + " " + port);
-    mqtt = new Paho.MQTT.Client(host, port,"clientJS");
+    mqtt = new Paho.MQTT.Client(host, port,"clientJSSubscriber");
     //document.write("connecting to "+ host);
     var options = {
 
@@ -41,4 +32,5 @@ function MQTTconnect() {
 
     mqtt.onMessageArrived = onMessageArrived;
     mqtt.connect(options); //connect
+
 }
