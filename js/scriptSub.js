@@ -29,6 +29,7 @@ function onConnect() {
 }
 
 function csv_download() {
+	dataToExport.length = 0;
     dataToExport.push(dataTable);
 
     let csvContent = "data:text/csv;charset=utf-8," +
@@ -40,6 +41,7 @@ function csv_download() {
     link.setAttribute("download", "my_data.csv");
     document.body.appendChild(link); // Required for FF
     link.click(); // This will download the data file named "my_data.csv".
+    dataTable.length = 0;
 
 }
 
