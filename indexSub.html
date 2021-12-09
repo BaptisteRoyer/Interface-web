@@ -10,13 +10,21 @@
     <script src="js/scriptSub.js"></script>
 </head>
 
-<body>
+<body onload="getItems()">
     <h1>Message subscriber</h1>
-    <script>
-    MQTTconnect();
-    </script>
-    Messages:<p id="messages"></p>
+    <h3> Rappel des valeurs : </h3>
+    
+    Fréquence min : <b id="fmin"> </b> <br>
+    Fréquence max : <b id="fmax"> </b> <br>
+    Nombre points : <b id="nbpts"> </b> <br>
+    Distance à parcourir : <b id="dap"> </b> <br>
+    Résolution spatiale : <b id="spar"> </b> <br>
+    <br>
+    Valeur pour <b id="curFreq"></b> : <b id="impedence"></b> <br>
     <button onclick="csv_download()">Download CSV</button>
+    <script>
+        MQTTconnect();
+    </script>
 </body>
 
 </html>
