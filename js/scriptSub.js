@@ -1,6 +1,6 @@
 var mqtt;
 var reconnectTimeout = 2000;
-var host = "192.168.1.146"; //change this
+var host = "192.168.43.58"; //change this
 var port = 9001;
 
 var isConnected = false;
@@ -9,6 +9,28 @@ var dataToExport = new Array();
 var impedTable = new Array();
 var freqTable = new Array();
 var params;
+
+function startMesure() {
+
+    var timer = $("#timer").val();
+
+    var topic = "mesureParams";
+    message = new Paho.MQTT.Message(timer);
+    message.destinationName = topic;
+    mqtt.send(message);
+
+    console.log(timer);
+    var countDown = setInterval(function() {
+        if (timer <= 0) {
+            clearInterval(countDown);
+            $("#timerWrite").text("Finished");
+        } else {
+            $("#timerWrite").text(timer);
+        }
+        timer -= 1;
+    }, 1000);
+
+}
 
 function getItems() {
     var fmin = 0;
@@ -37,7 +59,7 @@ function getItems() {
 function sendParams() {
     for (var i = 0; i < params.length; i++) {
         var topic = "mesureParams";
-        console.log(params[i]);
+        // console.log(params[i]);
         message = new Paho.MQTT.Message(params[i]);
         message.destinationName = topic;
         mqtt.send(message);
@@ -45,17 +67,18 @@ function sendParams() {
     }
 }
 
-function addToTab() {
-    var value = $("#impedence").text()
-    impedTable.push(value);
-}
 
 function onMessageArrived(r_message) {
-    out_msg = r_message.payloadString;
-    console.log(out_msg);
-    $("#impedence").text(out_msg);
-    addToTab();
-    console.log(impedTable);
+    if (r_message.destinationName == "sendTable") {
+        out_msg = r_message.payloadString;
+        out_msg = out_msg.replace(".", ",")
+        $("#impedence").text(out_msg);
+        impedTable.push(out_msg);
+    }
+    if (r_message.destinationName == "stopMesure") {
+        csv_download()
+    }
+
 }
 
 
@@ -63,9 +86,8 @@ function onConnect() {
     // Once a connection has been made, make a subscription and send a message.
 
     console.log("Connected");
-
     mqtt.subscribe("sendTable");
-    sendParams();
+    mqtt.subscribe("stopMesure");
 
 }
 
@@ -74,7 +96,7 @@ function csv_download() {
     dataToExport.push(impedTable);
 
     let csvContent = "data:text/csv;charset=utf-8," +
-        dataToExport.map(e => e.join(",")).join("\n");
+        dataToExport.map(e => e.join("\n")).join("\n");
 
     var encodedUri = encodeURI(csvContent);
     var link = document.createElement("a");
@@ -103,4 +125,13 @@ function MQTTconnect() {
     mqtt.onMessageArrived = onMessageArrived;
     mqtt.connect(options); //connect
 
+}
+
+function sleep(milliseconds) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+        if ((new Date().getTime() - start) > milliseconds) {
+            break;
+        }
+    }
 }
