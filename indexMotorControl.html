@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+    <title>Subscriber</title>
+    <link rel="stylesheet" href="css\style.css">
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script src="js/mqttws31.min.js"></script>
+    <script src="js/scriptMotorControl.js"></script>
+</head>
+
+<body>
+    <h1>Up or down counter</h1>
+    Valeur hauteur moteur : <b id="counter"></b>
+    <script>
+        eventListnenerHandler();
+        MQTTconnect();
+    </script>
+</body>
+
+</html>

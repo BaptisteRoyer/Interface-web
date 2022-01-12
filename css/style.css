@@ -59,8 +59,8 @@ input[type=submit]:hover {
 }
 
 
-#messages {
-    font-size: 200px;
+#counter {
+    font-size: 50px;
     margin: 0;
     align-self: center;
 }

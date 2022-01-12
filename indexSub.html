@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+    <title>Subscriber</title>
+    <link rel="stylesheet" href="css\style.css">
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script src="js/mqttws31.min.js"></script>
+    <script src="js/scriptSub.js"></script>
+</head>
+
+<body onload="getItems()">
+    <h1>Message subscriber</h1>
+    <div>
+        
+        Temps d'acquisition (en secondes) : <input type="number" id="timer" /> <br>
+        <button onclick="startMesure()">Start mesure</button> <br>
+        <br>
+        Temps restant : <b id="timerWrite"></b> <br>
+        Valeur : <b id="impedence"></b> <br>
+        Valeur hauteur moteur : <b id="counter"></b>
+
+    </div>
+    <script>
+        MQTTconnect();
+    </script>
+</body>
+
+</html>

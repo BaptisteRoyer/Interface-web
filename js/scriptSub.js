@@ -10,6 +10,8 @@ var impedTable = new Array();
 var freqTable = new Array();
 var params;
 
+var upDownCount = 0;
+
 function startMesure() {
 
     var timer = $("#timer").val();
@@ -36,7 +38,11 @@ function getItems() {
     var fmin = 0;
     var fmax = 0;
     var nbpts = 0;
-    var dap = 0;
+    var ampmin = 0;
+    var ampmax = 0;
+    var ampres = 0;
+    var ptd = 0;
+    var pta = 0;
     var spar = 0;
 
     params = JSON.parse(sessionStorage.getItem("params"));
@@ -44,22 +50,29 @@ function getItems() {
     fmin = params[0];
     fmax = params[1];
     nbpts = params[2];
-    dap = params[3];
-    spar = params[4];
+    ampmin = params[3];
+    ampmax = params[4];
+    ampres = params[5];
+    ptd = params[6];
+    pta = params[7];
+    spar = params[8];
 
     $("#fmin").append(fmin);
     $("#fmax").append(fmax);
     $("#nbpts").append(nbpts);
-    $("#dap").append(dap);
+    $("#ampmin").append(ampmin);
+    $("#ampmax").append(ampmax);
+    $("#ampres").append(ampres);
+    $("#ptd").append(ptd);
+    $("#pta").append(pta);
     $("#spar").append(spar);
 
-    var skip = false;
 }
 
 function sendParams() {
     for (var i = 0; i < params.length; i++) {
-        var topic = "mesureParams";
-        // console.log(params[i]);
+        var topic = "params";
+        console.log(params[i]);
         message = new Paho.MQTT.Message(params[i]);
         message.destinationName = topic;
         mqtt.send(message);
@@ -88,6 +101,7 @@ function onConnect() {
     console.log("Connected");
     mqtt.subscribe("sendTable");
     mqtt.subscribe("stopMesure");
+    sendParams();
 
 }
 
