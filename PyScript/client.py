@@ -49,6 +49,9 @@ def on_message(client,userdata,message):
 
 				for i in range(len(voltage_list)):
 					writer.writerow({'voltage': voltage_list[i], 'current': current_list[i]})
+				
+				voltage_list.clear()
+				current_list.clear()
 		
 		else:
 			voltage_list.append(values[0])
