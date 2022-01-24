@@ -56,7 +56,7 @@ function getItems() {
     ptd = params[6];
     pta = params[7];
     spar = params[8];
-
+    
     $("#fmin").append(fmin);
     $("#fmax").append(fmax);
     $("#nbpts").append(nbpts);
@@ -70,12 +70,20 @@ function getItems() {
 }
 
 function sendParams() {
-    for (var i = 0; i < params.length; i++) {
-        var topic = "params";
-        console.log(params[i]);
-        message = new Paho.MQTT.Message(params[i]);
-        message.destinationName = topic;
-        mqtt.send(message);
+    for (var i = 0; i <= params.length; i++) {
+        if (i == params.length) {
+            var topic = "readyToStart";
+            message = new Paho.MQTT.Message(" ");
+            message.destinationName = topic;
+            mqtt.send(message);
+        }
+        else {
+            var topic = "params";
+            console.log(params[i]);
+            message = new Paho.MQTT.Message(params[i]);
+            message.destinationName = topic;
+            mqtt.send(message);
+        }
 
     }
 }

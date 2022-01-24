@@ -34,22 +34,22 @@ def get_impedance(y1,y2,step):
     y1_max = y1[y1_peak]
     y2_max = y2[y2_peak]
 
-    amp = (y1_max-y2_max)*2
+    amp = (y1_max/y2_max)*2
     phi = np.mod(step*(y1_peak - y2_peak), 2*np.pi) # if neg => y2 in front of y1
 
     return (amp, phi)
 
-step = 0.001
-amp = 4
-phi = 0.301
+# step = 0.001
+# amp = 4
+# phi = 0.301
 
-x = np.arange(0,4*np.pi,step)
+# x = np.arange(0,4*np.pi,step)
 
-y1 = sin_generator(x,5,0)
-y2 = sin_generator(x,amp,phi)
+# y1 = sin_generator(x,5,0)
+# y2 = sin_generator(x,amp,phi)
 
-print(get_impedance(y1,y2,step))
+# print(get_impedance(y1,y2,step))
 
-plt.plot(x,y1)
-plt.plot(x,y2)
-plt.show()
+# plt.plot(x,y1)
+# plt.plot(x,y2)
+# plt.show()
