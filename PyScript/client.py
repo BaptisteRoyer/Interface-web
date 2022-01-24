@@ -1,32 +1,63 @@
-from genericpath import exists
-import matplotlib.pyplot as plt
-import numpy as np
 import csv
+from genericpath import exists
 import os
 import paho.mqtt.client as mqtt
 import tarfile
 
-from impedance_calculator import *
+# from impedance_calculator import *
 
 directory_exists = True
 directory_name_counter = 0
 main_directory_name = "mesure"
+voltage_list = []
+current_list = []
 
 def on_message(client,userdata,message):
+	global voltage_list, current_list
 	new_message = str(message.payload.decode("utf-8"))
 	
-	if message.topic == "newPosition":
-		position_directory_name = new_message
+	if message.topic == "firstPosition":
+		os.mkdir(new_message)
+		os.chdir(new_message)
 
+	elif message.topic == "firstAmp":
+		os.mkdir(new_message)
+		os.chdir(new_message)	
+
+	elif message.topic == "newPosition":
+		os.chdir("../../")
+		os.mkdir(new_message)
+		os.chdir(new_message)
 
 	elif message.topic == "newAmp":
-		print("1")
+		os.chdir("../")
+		os.mkdir(new_message)
+		os.chdir(new_message)
 
 	elif message.topic == "newFreq":
-		print("1")
+		os.mkdir(new_message)
+		os.chdir(new_message)
+	
+	elif message.topic == "sendValues":
+		values = new_message.split(";")
+		if values[0] == "DONE":
+			print ("DONE")
+			with open('values.csv', 'w', newline='') as csvfile:
+				fieldnames = ['voltage', 'current']
+				writer = csv.DictWriter(csvfile, delimiter=';',fieldnames=fieldnames)
+				writer.writeheader()
+
+				for i in range(len(voltage_list)):
+					writer.writerow({'voltage': voltage_list[i], 'current': current_list[i]})
+		
+		else:
+			voltage_list.append(values[0])
+			current_list.append(values[1])
+			print(new_message)
+		
 
 	# if "zip" in new_message:
-	if message.topic == "zip":
+	elif message.topic == "zip":
 		os.chdir("../../../")
 		tar = tarfile.open(main_directory_name + ".tar.gz", "w:gz")
 		tar.add("main_directory_name", arcname="main_directory_name")
@@ -35,7 +66,7 @@ def on_message(client,userdata,message):
 	# else:
 	# 	os.system("echo " + new_message + " >> " + file)
 
-def on_connect(client, userdata, flags):
+def on_connect(client, userdata, flags, properties=None):
 	print("Connected")
 
 while directory_exists:
@@ -48,19 +79,27 @@ while directory_exists:
 		directory_exists = False
 
 print("Directory " + main_directory_name + " created")
-os.system("mkdir "+ main_directory_name)
+os.mkdir(main_directory_name)
 os.chdir(main_directory_name)
 
-# client_name = "python_client"
-# host = "192.168.43.58"
-# client = mqtt.Client(client_name)
+client_name = "python_client"
+host = "192.168.43.58"
+client = mqtt.Client(client_name)
 
-# client.connect(host)
-# client.on_message = on_message
+client.connect(host)
+client.on_connect = on_connect
+client.on_message = on_message
+client.subscribe("firstPosition")
+client.subscribe("firstAmp")
+client.subscribe("newPosition")
+client.subscribe("newAmp")
+client.subscribe("newFreq")
+client.subscribe("sendValues")
+client.subscribe("zip")
 
-# try:
-# 	while True:
-# 		client.loop()
+try:
+	while True:
+		client.loop()
 
-# except KeyboardInterrupt:
-# 	client.loop_stop()
+except KeyboardInterrupt:
+	client.loop_stop()
