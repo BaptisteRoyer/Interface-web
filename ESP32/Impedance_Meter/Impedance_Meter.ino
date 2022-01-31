@@ -9,21 +9,23 @@
 #define MQTT_BUFFER_SIZE 24
 
 
-// Change this regarding your WiFi access point
+// Change this regarding your WiFi access point 
 const char* ssid = "BaptMobile ";
 const char* password = "Isischat45";
+const char* mqttIP = "192.168.43.58";
+const long mqttPort = 1883;
 
-// Acquisition time in microseconds
+// Acquisition time in microseconds 
 unsigned long acqTimeInMicroseconds;
 
-// Variable for acquisition
+// Variable for acquisition 
 boolean rdy = false;
 boolean acq = false;
 
-// Store the current result from ADC
+// Store the current result from ADC 
 double mmryResult;
 
-// Variable for data
+// Variable for data 
 double curFreq;
 double begFreq;
 double endFreq;
@@ -46,17 +48,21 @@ Vector<double> paramsStart(storage_array);
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-// Interruption routine
+// Interruption routine 
 void IRAM_ATTR ISR()
 {
   rdy = true;
 }
 
+
+// Sends voltage and current mesured to the Python script via mqtt 
 void sendCurrentVoltage (double amplitude, double frequency, double phase)
 {
   unsigned long startTime = micros();
+  // Calculates three periods to mesure 
   acqTimeInMicroseconds = 3*(1/frequency)*pow(10,6);
   setDDS(amplitude, frequency, phase);
+  // Sets up an infinite loop while there are values to evaluate
   while (acq)
   {
     if(rdy)
@@ -78,9 +84,10 @@ void sendCurrentVoltage (double amplitude, double frequency, double phase)
       }
     }
   }
+  // When the time is up send "DONE;" to the Python script via mqtt 
   if (!acq)
   {
-    client.publish("endValues","");
+    client.publish("voltageCurrent","DONE;");
   }
   
 }
@@ -91,11 +98,12 @@ void callback(char* topic, byte* payload, unsigned int length)
   {
     char buf[MQTT_BUFFER_SIZE];
   
-    // Form a C-string from the payload
+    // Form a C-string from the payload 
     memcpy(buf, payload, length);
     buf[length] = '\0';
 
     double value = strtod(buf, NULL);
+    // Push all the values in a vectory for simplicity
     paramsStart.push_back(value);
     if(paramsStart.size() == 9)
     {
@@ -105,10 +113,12 @@ void callback(char* topic, byte* payload, unsigned int length)
     
   }
 
+  // When all the values are in the vector, the routine starts
   else if ((strcmp(topic,"readyToStart"))== 0)
   {
     Serial.println("Ready to start !");
     
+    // Sets all the frequenciee, amplitude and position variables
     begFreq = paramsStart.at(0);
     Serial.println(begFreq);
     endFreq = paramsStart.at(1);
@@ -142,15 +152,19 @@ void callback(char* topic, byte* payload, unsigned int length)
     
   }
 
+  // When python finished it's business, start the routine
   else if((strcmp(topic,"pythonReady"))== 0)
   {
+    // Check if all the frequencies have been swiped
     if(curFreq == endFreq)
     {
       curFreq = begFreq;
+      // Check if all the amplitudes have been swiped
       if(curAmp == endAmp)
       {
         client.publish("calculateImpedance","")
         curAmp = begAmp;
+        // Check if all the positions have been swiped
         if(curPosition == endPosition)
         {
           client.publish("espEndMesure","");
@@ -158,6 +172,7 @@ void callback(char* topic, byte* payload, unsigned int length)
         else
         {
           curPosition += stepPosition;
+          // If the current position exceeds the max position, set it to the max position
           if(curPosition > endPosition)
           {
             curPosition = endPosition;
@@ -168,6 +183,7 @@ void callback(char* topic, byte* payload, unsigned int length)
       else
       {
         curAmp += stepAmp;
+        // If the current amplitude exceeds the max amplitude, set it to the max amplitude 
         if(curAmp > stepAmp)
         {
           curAmp = endAmp;
@@ -178,6 +194,7 @@ void callback(char* topic, byte* payload, unsigned int length)
     else
     {
       curFreq += stepFreq;
+      // If the current frequency exceeds the max frequency, set it to the max frequency 
       if(curFreq > endFreq)
       {
         curFreq = endFreq;
@@ -190,7 +207,7 @@ void callback(char* topic, byte* payload, unsigned int length)
       sendCurrentVoltage(curAmp,curFreq,0);
     }
   }
-  
+  // Move down the motor with down arrow key
   else if((strcmp(topic,"motorMoveDown"))== 0)
   {
     Serial.println("DOWN");
@@ -205,7 +222,7 @@ void callback(char* topic, byte* payload, unsigned int length)
 //        Serial.println(i);         // print the character
 //      }
   }
-  
+  // Move up the motor with up arrow key
   else if((strcmp(topic,"motorMoveUp"))== 0)
   {
     Serial.println("UP");
@@ -224,28 +241,30 @@ void callback(char* topic, byte* payload, unsigned int length)
 
 void setup()
 {
-
-  SPI_INIT();
-  
+  // Debug purposes
   Serial.begin(115200);
   
+  // Initialize for i2c communication
   Wire.begin (21, 22);   // sda= GPIO_21 /scl= GPIO_22
   
+  // Initialize WiFi connection
   WiFi.begin(ssid,password);
   
+  // Reattempt connection to WiFi each time it does not work
   while (WiFi.status() != WL_CONNECTED)
   {
     WiFi.begin(ssid,password);
     Serial.println("Connecting to WiFi...");
     delay(WIFI_DELAY_RECONNECT);
   }
-
+ZZ
   if (WiFi.status() == WL_CONNECTED)
   {
     Serial.println("WiFi connected !");
   }
 
-  client.setServer("192.168.43.58", 1883);
+  // Initialize mqtt communication
+  client.setServer(mqttIP, mqttPort);
 
   attachInterrupt(DRDY_PIN, ISR, FALLING);
 
@@ -266,6 +285,7 @@ void loop()
 {
   if (!client.connected()) {
     Serial.println("Client not connected. Connecting...");
+    // When connected subscribe to topics
     if (client.connect("clientESPSubscriber")) {
       Serial.println("Client connected !");
       client.subscribe("params");
@@ -276,6 +296,7 @@ void loop()
     } 
     else 
     {
+      // Send error when not connected
       Serial.print("failed, rc=");
       Serial.print(client.state());
       Serial.println(" try again in 5 seconds");

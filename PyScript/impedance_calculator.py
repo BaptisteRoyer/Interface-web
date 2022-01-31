@@ -9,6 +9,9 @@ def sin_generator(x,A,phi):
 # if decrease, wait for increase then call the increase detection routine
 # else wait for decrease, then return the max
 
+
+# gets the peak of the sine
+
 def get_sin_peak(y):
     i = 0
     curr_val = y[0]
@@ -25,6 +28,8 @@ def get_sin_peak(y):
         i += 1
 
     return i
+
+# calculates the impedance given a voltage and a current
 
 def get_impedance(y1,y2,step):
     
