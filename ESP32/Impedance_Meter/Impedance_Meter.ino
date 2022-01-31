@@ -52,8 +52,6 @@ void IRAM_ATTR ISR()
   rdy = true;
 }
 
-//Function that makes a double into a char array
-
 void sendCurrentVoltage (double amplitude, double frequency, double phase)
 {
   unsigned long startTime = micros();
@@ -67,14 +65,13 @@ void sendCurrentVoltage (double amplitude, double frequency, double phase)
       
       uint8_t dStatus = 0, dData = 0, dCRC = 0;
 
-      double result = adcDataRead(&dStatus, &dData, &dCRC) * (REF_ADC / ADC_FULLSCALE);     
+      double voltage = adcDataRead(&dStatus, &dData, &dCRC) * (REF_ADC / ADC_FULLSCALE);     
+      double current = adcDataRead(&dStatus, &dData, &dCRC) * (REF_ADC / ADC_FULLSCALE);     
 
-      Serial.println(result);
+      Serial.println(voltage);
+      Serial.println(current);
 
-      String text = String(result);
-      char tab[5];
-      text.toCharArray(tab, 5);
-      client.publish("sendValues",tab);
+      client.publish("voltageCurrent",concatenateValues(voltage,current));
       if (micros() - startTime >= acqTimeInMicroseconds)
       {
         acq = false;
@@ -100,6 +97,10 @@ void callback(char* topic, byte* payload, unsigned int length)
 
     double value = strtod(buf, NULL);
     paramsStart.push_back(value);
+    if(paramsStart.size() == 9)
+    {
+      client.publish("readyToStart","");
+    }
     //paramsStart.clear();
     
   }
@@ -133,6 +134,10 @@ void callback(char* topic, byte* payload, unsigned int length)
     curAmp = begAmp;
     curPosition = begPosition;
 
+    client.publish("firstPosition",convertDoubleToString(begPosition));
+    client.publish("firstAmp",convertDoubleToString(begAmp));
+    client.publish("firstFreq",convertDoubleToString(begFreq));
+
     paramsStart.clear();
     
   }
@@ -144,10 +149,11 @@ void callback(char* topic, byte* payload, unsigned int length)
       curFreq = begFreq;
       if(curAmp == endAmp)
       {
+        client.publish("calculateImpedance","")
         curAmp = begAmp;
         if(curPosition == endPosition)
         {
-          client.publish("endEspPosition","");
+          client.publish("espEndMesure","");
         }
         else
         {
@@ -156,6 +162,7 @@ void callback(char* topic, byte* payload, unsigned int length)
           {
             curPosition = endPosition;
           }
+          client.publish("newPosition",convertDoubleToString(curPosition));
         }
       }
       else
@@ -165,22 +172,21 @@ void callback(char* topic, byte* payload, unsigned int length)
         {
           curAmp = endAmp;
         }
+        client.publish("newAmp",convertDoubleToString(curAmp));
       }
     }
     else
     {
       curFreq += stepFreq;
-      
       if(curFreq > endFreq)
       {
         curFreq = endFreq;
       }
+      client.publish("newFreq",convertDoubleToString(curFreq));
     }
     if (curPosition != endPosition)
     {
       acq = true;
-      //Concatenate all the parameters from current position amplitude and frequency
-      client.publish("curMesureParams",convertDoubleToString(begAmp));
       sendCurrentVoltage(curAmp,curFreq,0);
     }
   }

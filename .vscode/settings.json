@@ -1,0 +1,10 @@
+{
+    "python.linting.pylintEnabled": false,
+    "python.linting.enabled": true,
+    "python.linting.banditEnabled": true,
+    "files.associations": {
+        "system_error": "cpp",
+        "xtr1common": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
+}

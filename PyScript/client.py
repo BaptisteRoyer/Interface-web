@@ -1,14 +1,20 @@
-import csv
 from genericpath import exists
+from impedance_calculator import *
+
+import csv
+import pandas
 import os
 import paho.mqtt.client as mqtt
 import tarfile
 
 # from impedance_calculator import *
 
+# directory generator variables
 directory_exists = True
 directory_name_counter = 0
 main_directory_name = "mesure"
+
+# lists of voltage and current to generate csv files
 voltage_list = []
 current_list = []
 
@@ -24,21 +30,26 @@ def on_message(client,userdata,message):
 		os.mkdir(new_message)
 		os.chdir(new_message)	
 
+	elif message.topic == "firstFreq":
+		os.mkdir(new_message)
+		os.chdir(new_message)	
+
 	elif message.topic == "newPosition":
-		os.chdir("../../")
+		os.chdir("../../../")
 		os.mkdir(new_message)
 		os.chdir(new_message)
 
 	elif message.topic == "newAmp":
-		os.chdir("../")
+		os.chdir("../../")
 		os.mkdir(new_message)
 		os.chdir(new_message)
 
 	elif message.topic == "newFreq":
+		os.chdir("../")
 		os.mkdir(new_message)
 		os.chdir(new_message)
 	
-	elif message.topic == "sendValues":
+	elif message.topic == "voltageCurrent":
 		values = new_message.split(";")
 		if values[0] == "DONE":
 			print ("DONE")
@@ -52,12 +63,40 @@ def on_message(client,userdata,message):
 				
 				voltage_list.clear()
 				current_list.clear()
-		
+				
 		else:
+			print(new_message)
 			voltage_list.append(values[0])
 			current_list.append(values[1])
-			print(new_message)
-		
+	
+	elif message.topic == "calculateImpedance":
+		os.chdir("../../")
+
+		with open('impedance.csv', 'w', newline='') as csvfile:
+				fieldnames = ['frequency', 'impedance','phase']
+				writer = csv.DictWriter(csvfile, delimiter=';',fieldnames=fieldnames)
+				writer.writeheader()
+
+		dirList = os.listdir()
+
+		for i in range(len(dirList)):
+			os.chdir(dirList[i])
+			
+			colnames = ['voltage','current']
+			data = pandas.read_csv('values.csv', names=colnames)
+			
+			voltage = data.voltage.tolist()
+			current = data.current.tolist()
+
+			curFrequency = os.path.basename(os.getcwd())
+			curImpedance = get_impedance(voltage, current,1)[0]
+			curPhase = get_impedance(voltage, current,1)[1]
+
+			writer.writerow({'frequency': curFrequency, 'impedance':curImpedance,'phase': curPhase})
+			os.chdir('../')
+
+
+			
 
 	# if "zip" in new_message:
 	elif message.topic == "zip":
@@ -90,8 +129,10 @@ host = "192.168.43.58"
 client = mqtt.Client(client_name)
 
 client.connect(host)
+
 client.on_connect = on_connect
 client.on_message = on_message
+
 client.subscribe("firstPosition")
 client.subscribe("firstAmp")
 client.subscribe("newPosition")

@@ -34,7 +34,7 @@ def get_impedance(y1,y2,step):
     y1_max = y1[y1_peak]
     y2_max = y2[y2_peak]
 
-    amp = (y1_max/y2_max)*2
+    amp = y1_max/y2_max
     phi = np.mod(step*(y1_peak - y2_peak), 2*np.pi) # if neg => y2 in front of y1
 
     return (amp, phi)

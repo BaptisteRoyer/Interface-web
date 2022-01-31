@@ -375,4 +375,5 @@ void adcRegMap(void);
 void adcReadRegs(unsigned int regnum, unsigned int count, uint8_t *data);
 long adcDataRead(uint8_t *dStatus, uint8_t *dData, uint8_t *dCRC);
 char *convertDoubleToString(double value);
+char *concatenateValues(double voltage,double current);
 #endif // CONFIG_H

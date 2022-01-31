@@ -245,3 +245,18 @@ char *convertDoubleToString(double value)
 
   return outString;
 }
+
+char *concatenateValues(double voltage,double current)
+{
+  String voltageStr = String(voltage);
+  String currentStr = String(current);
+
+  String concatenateStr = voltageStr + currentStr;
+
+  int stringLength = concatenateStr.length();
+  char outString[stringLength + 1];
+  
+  strcpy(outString, concatenateStr.c_str());
+
+  return outString;
+}
