@@ -1,30 +1,27 @@
 var mqtt;
 var reconnectTimeout = 2000;
-var host = "192.168.1.146"; //change this
+var host = "192.168.43.58"; //change this according to your brokers IP
 var port = 9001;
 
-function onConnect() {
-    // Once a connection has been made, make a subscription and send a message.
-
-    console.log("Connected ");
-    //mqtt.subscribe("sensor1");
-    message = new Paho.MQTT.Message("Hello World");
-    message.destinationName = "sensor1";
-    mqtt.send(message);
+function parseInfo() {
+    parseTable = [
+        $("#fmin").val(),
+        $("#fmax").val(),
+        $("#nbpts").val(),
+        $("#ampmin").val(),
+        $("#ampmax").val(),
+        $("#ampres").val(),
+        $("#ptd").val(),
+        $("#pta").val(),
+        $("#spar").val()
+    ]
+    sessionStorage.setItem("params", JSON.stringify(parseTable));
 }
 
-function MQTTconnect() {
-    console.log("connecting to " + host + " " + port);
-    mqtt = new Paho.MQTT.Client(host, port,"clientJS");
-    //document.write("connecting to "+ host);
-    var options = {
+function pushStart(){
+    $('#ptd').val($('#current_motor_position').text());
+}
 
-        timeout: 3,
-        onSuccess: onConnect,
-        // onFailure: console.log("ALLO"),
-
-    };
-
-    mqtt.onMessageArrived = onMessageArrived;
-    mqtt.connect(options); //connect
+function pushEnd(){
+    $('#pta').val($('#current_motor_position').text());
 }

@@ -10,31 +10,7 @@ var impedTable = new Array();
 var freqTable = new Array();
 var params;
 
-var upDownCount = 0;
-
-function startMesure() {
-
-    var timer = $("#timer").val();
-
-    var topic = "mesureParams";
-    message = new Paho.MQTT.Message(timer);
-    message.destinationName = topic;
-    mqtt.send(message);
-
-    console.log(timer);
-    var countDown = setInterval(function() {
-        if (timer <= 0) {
-            clearInterval(countDown);
-            $("#timerWrite").text("Finished");
-        } else {
-            $("#timerWrite").text(timer);
-        }
-        timer -= 1;
-    }, 1000);
-
-}
-
-function getItems() {
+function getItems(){
     var fmin = 0;
     var fmax = 0;
     var nbpts = 0;
@@ -69,7 +45,7 @@ function getItems() {
 
 }
 
-function sendParams() {
+function sendParams(){
     for (var i = 0; i <= params.length; i++) {
         if (i == params.length) {
             var topic = "readyToStart";
@@ -88,50 +64,63 @@ function sendParams() {
     }
 }
 
-
-function onMessageArrived(r_message) {
-    if (r_message.destinationName == "sendTable") {
-        out_msg = r_message.payloadString;
-        out_msg = out_msg.replace(".", ",")
-        $("#impedence").text(out_msg);
-        impedTable.push(out_msg);
+function parseCSV(path){
+    $.ajax({
+        url:     "../"+ path,
+        cache: false,
+        async: false,
+        success: function (csv) {
+            data = $.csv.toArrays(csv,{
+                delimiter: "'",
+                separator: ";"
+            });
+        },
+        dataType: "text",
+        complete: function () {
+            console.log(data);
+        }
+    });
+    
+    
+    frequency = new Array();
+    impedance = new Array();
+    phase = new Array();
+    
+    for (var i = 0; i < data.length; i++) {
+        frequency.push(data[i][0])
+        impedance.push(data[i][1])
+        phase.push(data[i][2])
     }
+
+    drawChart(frequency,impedance,phase);
+
+}
+
+function onMessageArrived(r_message){
+    out_msg = r_message.payloadString;
+
     if (r_message.destinationName == "stopMesure") {
         csv_download()
     }
 
+    else if(r_message.destinationName == "drawGraph"){
+        parseCSV(out_msg);
+    }
+
 }
 
 
-function onConnect() {
+function onConnect(){
     // Once a connection has been made, make a subscription and send a message.
 
     console.log("Connected");
-    mqtt.subscribe("sendTable");
     mqtt.subscribe("stopMesure");
+    mqtt.subscribe("drawGraph");
     sendParams();
 
 }
 
-function csv_download() {
-    dataToExport.length = 0;
-    dataToExport.push(impedTable);
-
-    let csvContent = "data:text/csv;charset=utf-8," +
-        dataToExport.map(e => e.join("\n")).join("\n");
-
-    var encodedUri = encodeURI(csvContent);
-    var link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "my_data.csv");
-    document.body.appendChild(link); // Required for FF
-    link.click(); // This will download the data file named "my_data.csv".
-
-    impedTable.length = 0;
-    freqTable.length = 0;
-}
-
-function MQTTconnect() {
+function MQTTconnect(){
 
     console.log("connecting to " + host + " " + port);
     mqtt = new Paho.MQTT.Client(host, port, "clientJSSubscriber");
@@ -149,11 +138,28 @@ function MQTTconnect() {
 
 }
 
-function sleep(milliseconds) {
+function sleep(milliseconds){
     var start = new Date().getTime();
     for (var i = 0; i < 1e7; i++) {
         if ((new Date().getTime() - start) > milliseconds) {
             break;
         }
     }
+}
+
+function drawChart(frequency,impedance,phase){
+    var chart = c3.generate({
+        bindto:'#chart',
+        point: {
+            r: 1.5
+        },
+        data:{
+            x: 'frequency',
+            columns: [
+                frequency,
+                impedance,
+                phase
+            ]
+        }
+    })
 }

@@ -1,12 +1,9 @@
 console.log("script Motor Control loaded")
-var mqtt;
-var reconnectTimeout = 2000;
-var host = "192.168.43.58"; //change this
-var port = 9001;
 
 var isConnected = false;
 
 var upDownCount = 0;
+$('#current_motor_position').text(upDownCount);
 
 function eventListnenerHandler() {
     document.addEventListener('keydown', keyDownHandler, false);
@@ -15,19 +12,19 @@ function eventListnenerHandler() {
 function keyDownHandler(event) {
 
     if (event.keyCode == 40) {
-        upDownCount--;
+        upDownCount++;
+        $('#current_motor_position').text(upDownCount);
 
         var topic = "motorMoveDown";
-        console.log("motorMoveDown");
         message = new Paho.MQTT.Message("");
         message.destinationName = topic;
         mqtt.send(message);
 
     } else if (event.keyCode == 38) {
-        upDownCount++;
-
+        upDownCount--;
+        $('#current_motor_position').text(upDownCount);
+                    
         var topic = "motorMoveUp";
-        console.log("motorMoveUp");
         message = new Paho.MQTT.Message("");
         message.destinationName = topic;
         mqtt.send(message);

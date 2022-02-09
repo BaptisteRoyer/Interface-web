@@ -109,9 +109,10 @@ def on_message(client,userdata,message):
 
 			writer.writerow({'frequency': curFrequency, 'impedance':curImpedance,'phase': curPhase})
 			os.chdir('../')
-
-
-			
+		
+		cwd = os.getcwd()
+		cwd_split = cwd.split("Interface web",1)[1]
+		client.publish("drawGraph",cwd_split)
 
 	# if "zip" in new_message:
 
