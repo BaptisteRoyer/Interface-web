@@ -55,3 +55,12 @@ function MQTTconnect() {
     mqtt.connect(options); //connect
 
 }
+
+
+function pushStart(){
+    $('#ptd').val($('#current_motor_position').text());
+}
+
+function pushEnd(){
+    $('#pta').val($('#current_motor_position').text());
+}

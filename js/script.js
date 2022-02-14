@@ -17,11 +17,3 @@ function parseInfo() {
     ]
     sessionStorage.setItem("params", JSON.stringify(parseTable));
 }
-
-function pushStart(){
-    $('#ptd').val($('#current_motor_position').text());
-}
-
-function pushEnd(){
-    $('#pta').val($('#current_motor_position').text());
-}

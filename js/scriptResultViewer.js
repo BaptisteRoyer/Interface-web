@@ -64,47 +64,31 @@ function sendParams(){
     }
 }
 
-function parseCSV(path){
-    $.ajax({
-        url:     "../"+ path,
-        cache: false,
-        async: false,
-        success: function (csv) {
-            data = $.csv.toArrays(csv,{
-                delimiter: "'",
-                separator: ";"
-            });
-        },
-        dataType: "text",
-        complete: function () {
-            console.log(data);
-        }
-    });
-    
-    
-    frequency = new Array();
-    impedance = new Array();
-    phase = new Array();
-    
-    for (var i = 0; i < data.length; i++) {
-        frequency.push(data[i][0])
-        impedance.push(data[i][1])
-        phase.push(data[i][2])
-    }
-
-    drawChart(frequency,impedance,phase);
-
-}
-
 function onMessageArrived(r_message){
     out_msg = r_message.payloadString;
 
-    if (r_message.destinationName == "stopMesure") {
-        csv_download()
+    if(r_message.destinationName == "drawGraph"){
+        parseTable = [
+            out_msg,
+            $("#curAmplitude").val(),
+            $("#curPosition").val()
+        ]
+
+        sessionStorage.setItem("pathCSV", JSON.stringify(parseTable));
+
+        window.open("../drawGraph.html", '_blank').focus();
     }
 
-    else if(r_message.destinationName == "drawGraph"){
-        parseCSV(out_msg);
+    else if(r_message.destinationName == "newFreq"){
+        $("curFrequency").append(out_msg);
+    }
+
+    else if(r_message.destinationName == "newAmp"){
+        $("curAmplitude").append(out_msg);
+    }
+
+    else if(r_message.destinationName == "newPosition"){
+        $("curPosition").append(out_msg);
     }
 
 }
@@ -116,6 +100,9 @@ function onConnect(){
     console.log("Connected");
     mqtt.subscribe("stopMesure");
     mqtt.subscribe("drawGraph");
+    mqtt.subscribe("newFreq");
+    mqtt.subscribe("newAmp");
+    mqtt.subscribe("newPosition");
     sendParams();
 
 }
@@ -145,21 +132,4 @@ function sleep(milliseconds){
             break;
         }
     }
-}
-
-function drawChart(frequency,impedance,phase){
-    var chart = c3.generate({
-        bindto:'#chart',
-        point: {
-            r: 1.5
-        },
-        data:{
-            x: 'frequency',
-            columns: [
-                frequency,
-                impedance,
-                phase
-            ]
-        }
-    })
 }

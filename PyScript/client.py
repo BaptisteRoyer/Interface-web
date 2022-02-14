@@ -1,6 +1,7 @@
 from genericpath import exists
 from impedance_calculator import *
 
+import sys
 import csv
 import pandas
 import os
@@ -32,11 +33,12 @@ def on_message(client,userdata,message):
 	elif message.topic == "firstAmp":
 		os.mkdir(new_message)
 		os.chdir(new_message)	
+		client.publish("pythonReady")
 
 	# sets the first frequency directory
 	elif message.topic == "firstFreq":
 		os.mkdir(new_message)
-		os.chdir(new_message)	
+		os.chdir(new_message)
 
 	# sets the directory for a new position
 	elif message.topic == "newPosition":
@@ -113,17 +115,16 @@ def on_message(client,userdata,message):
 		cwd = os.getcwd()
 		cwd_split = cwd.split("Interface web",1)[1]
 		client.publish("drawGraph",cwd_split)
-
+	
 	# if "zip" in new_message:
-
 	elif message.topic == "zip":
 		os.chdir("../../../")
 		tar = tarfile.open(main_directory_name + ".tar.gz", "w:gz")
 		tar.add("main_directory_name", arcname="main_directory_name")
 		tar.close()
+		# os.execv(sys.argv[0], sys.argv)
 
-	# else:
-	# 	os.system("echo " + new_message + " >> " + file)
+
 
 # debug option to see if client is connected
 def on_connect(client, userdata, flags, properties=None):

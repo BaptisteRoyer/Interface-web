@@ -151,8 +151,7 @@ void callback(char* topic, byte* payload, unsigned int length)
     paramsStart.clear();
     
   }
-
-  // When python finished it's business, start the routine
+    // When python finished it's business, start the routine
   else if((strcmp(topic,"pythonReady"))== 0)
   {
     // Check if all the frequencies have been swiped
