@@ -1,22 +1,3 @@
-// function that gets every item in the "pathCSV" cache variable
-function getItems(){
-    var path = "";
-    var position = "";
-    var amplitude = "";
-    // parses the "pathCSV" cache variable as a table
-    pathCSV = JSON.parse(sessionStorage.getItem("pathCSV"));
-
-    path = pathCSV[0];
-    position = pathCSV[2];
-    amplitude = pathCSV[1];
-
-    $("#curPosition").append(position)
-    $("#curAmplitude").append(amplitude);
-
-    parseCSV(path);
-    
-}
-
 // function which parses the CSV file at the path "path"
 function parseCSV(path){
     $.ajax({

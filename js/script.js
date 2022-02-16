@@ -1,8 +1,9 @@
 var mqtt;
 var reconnectTimeout = 2000;
-var host = "192.168.43.58"; //change this according to your brokers IP
+var host = "localhost"; //change this according to your brokers IP
 var port = 9001;
 
+// function which parses the different values of the form in index.js
 function parseInfo() {
     parseTable = [
         $("#fmin").val(),
@@ -15,5 +16,6 @@ function parseInfo() {
         $("#pta").val(),
         $("#spar").val()
     ]
+    // the different infos are stored in the browser cache so that they can be used by other scripts
     sessionStorage.setItem("params", JSON.stringify(parseTable));
 }

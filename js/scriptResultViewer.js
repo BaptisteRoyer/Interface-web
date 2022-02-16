@@ -1,6 +1,6 @@
 var mqtt;
 var reconnectTimeout = 2000;
-var host = "192.168.43.58"; //change this according to your brokers IP
+var host = "localhost"; //change this according to your brokers IP
 var port = 9001;
 
 var isConnected = false;
@@ -10,6 +10,7 @@ var impedTable = new Array();
 var freqTable = new Array();
 var params;
 
+// function which gets all items stored in the sessionStorage "params" and puts the into an array 
 function getItems(){
     var fmin = 0;
     var fmax = 0;
@@ -33,6 +34,7 @@ function getItems(){
     pta = params[7];
     spar = params[8];
     
+    // writes the previous information on the web page
     $("#fmin").append(fmin);
     $("#fmax").append(fmax);
     $("#nbpts").append(nbpts);
@@ -45,28 +47,30 @@ function getItems(){
 
 }
 
+// function needed to send the different parameters to the python and esp
 function sendParams(){
-    for (var i = 0; i <= params.length; i++) {
-        if (i == params.length) {
-            var topic = "readyToStart";
-            message = new Paho.MQTT.Message(" ");
-            message.destinationName = topic;
-            mqtt.send(message);
-        }
-        else {
-            var topic = "params";
-            console.log(params[i]);
-            message = new Paho.MQTT.Message(params[i]);
-            message.destinationName = topic;
-            mqtt.send(message);
-        }
-
+    
+    for (var i = 0; i < params.length; i++) {
+                
+        var topic = "params";
+        console.log(params[i]);
+        message = new Paho.MQTT.Message(params[i]);
+        message.destinationName = topic;
+        mqtt.send(message);
+        
     }
+
+    var topic = "readyToStart";
+    message = new Paho.MQTT.Message(" ");
+    message.destinationName = topic;
+    mqtt.send(message);
 }
 
+// this function deals with every message received on the mqtt thread
 function onMessageArrived(r_message){
     out_msg = r_message.payloadString;
 
+    // if the message is "drawGraph" we open a new browser tab with the corresponding graph
     if(r_message.destinationName == "drawGraph"){
         parseTable = [
             out_msg,
@@ -79,16 +83,19 @@ function onMessageArrived(r_message){
         window.open("../drawGraph.html", '_blank').focus();
     }
 
+    // if the message is "newFreq" we change the text at the id "curFrequency"
     else if(r_message.destinationName == "newFreq"){
-        $("curFrequency").append(out_msg);
+        $("#curFrequency").text(out_msg);
     }
 
+    // if the message is "newAmp" we change the text at the id "curAmplitude"
     else if(r_message.destinationName == "newAmp"){
-        $("curAmplitude").append(out_msg);
+        $("#curAmplitude").text(out_msg);
     }
 
+    // if the message is "newPosition" we change the text at the id "curPosition"
     else if(r_message.destinationName == "newPosition"){
-        $("curPosition").append(out_msg);
+        $("#curPosition").text(out_msg);
     }
 
 }
@@ -107,6 +114,7 @@ function onConnect(){
 
 }
 
+// function deals with mqtt
 function MQTTconnect(){
 
     console.log("connecting to " + host + " " + port);

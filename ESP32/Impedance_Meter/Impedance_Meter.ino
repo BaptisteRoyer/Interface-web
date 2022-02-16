@@ -112,7 +112,6 @@ void callback(char* topic, byte* payload, unsigned int length)
     //paramsStart.clear();
     
   }
-
   // When all the values are in the vector, the routine starts
   else if ((strcmp(topic,"readyToStart"))== 0)
   {
@@ -291,6 +290,7 @@ void loop()
       client.subscribe("motorMoveUp");
       client.subscribe("motorMoveDown");
       client.subscribe("readyToStart");
+      client.subscribe("pythonReady");
       client.setCallback(callback);
     } 
     else 
@@ -305,4 +305,4 @@ void loop()
 
   }
   client.loop();
-} 
+}

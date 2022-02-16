@@ -5,10 +5,14 @@ var isConnected = false;
 var upDownCount = 0;
 $('#current_motor_position').text(upDownCount);
 
+
+// launches a function when a key is pressed
 function eventListnenerHandler() {
     document.addEventListener('keydown', keyDownHandler, false);
 }
 
+
+// function called when a key is pressed
 function keyDownHandler(event) {
 
     if (event.keyCode == 40) {
@@ -32,6 +36,7 @@ function keyDownHandler(event) {
     }
 }
 
+// function launched when mqtt is connected to a broker
 function onConnect() {
     // Once a connection has been made, make a subscription and send a message.
 
@@ -39,6 +44,7 @@ function onConnect() {
 
 }
 
+// function deals with mqtt 
 function MQTTconnect() {
 
     console.log("connecting to " + host + " " + port);
@@ -56,11 +62,12 @@ function MQTTconnect() {
 
 }
 
-
+// input the height of the motor for the maximum position, the start position of the program
 function pushStart(){
     $('#ptd').val($('#current_motor_position').text());
 }
 
+// input the height of the motor for the minimum position, the end position of the program
 function pushEnd(){
     $('#pta').val($('#current_motor_position').text());
 }
