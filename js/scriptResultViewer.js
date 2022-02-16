@@ -1,6 +1,6 @@
 var mqtt;
 var reconnectTimeout = 2000;
-var host = "localhost"; //change this according to your brokers IP
+var host = "127.0.0.1"; //change this according to your brokers IP
 var port = 9001;
 
 var isConnected = false;
